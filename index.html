@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
+        /* Reset and Base Styles */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -19,6 +20,19 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
             background: #f0f0f0;
+            position: relative;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        /* Allow text selection in input fields and editable areas */
+        input, textarea, select, button {
+            -webkit-user-select: text; /* Safari */
+            -moz-user-select: text;    /* Firefox */
+            -ms-user-select: text;     /* Internet Explorer/Edge */
+            user-select: text;         /* Standard */
         }
 
         /* Countdown Timer Styling */
@@ -32,6 +46,10 @@
             color: #333;
             z-index: 2;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
         }
 
         /* Popup Styling */
@@ -39,36 +57,356 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(255,255,255,0.1));
             color: #fff;
             padding: 30px 50px;
             border-radius: 10px;
             display: none;
-            z-index: 3;
+            z-index: 20;
             text-align: center;
-            font-size: 1.5em;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            font-size: 1.6em;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            animation: fadeIn 0.5s ease forwards;
+            transition: transform 0.3s ease;
         }
 
-        /* Overlay for Popup */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -60%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Overlay for Popup and Modal */
         #overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.7);
             display: none;
-            z-index: 2;
+            z-index: 15;
+            animation: fadeInOverlay 0.5s ease forwards;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
         }
 
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 0.7; }
+        }
+
+        /* Menu Icon Styling */
+        #menu-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 30px;
+            cursor: pointer;
+            z-index: 21;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #menu-icon.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #menu-icon div {
+            width: 100%;
+            height: 4px;
+            background-color: #333;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Transform the menu icon to an arrow when active */
+        #menu-icon.active div:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        #menu-icon.active div:nth-child(2) {
+            opacity: 0;
+        }
+
+        #menu-icon.active div:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* Server Browser Modal Styling */
+        #server-browser-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(240, 245, 255, 0.95), rgba(220, 235, 255, 0.95));
+            display: none;
+            z-index: 16;
+            overflow-y: auto;
+            animation: slideIn 0.5s ease forwards;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-100%); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #server-browser-modal h2 {
+            margin: 60px 0 20px 0;
+            color: #333;
+            text-align: center;
+            font-size: 2.2em;
+            position: relative;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        /* Back Button in Server Browser */
+        #back-to-main {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #6DD5FA, #2980B9);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        #back-to-main:hover {
+            background: linear-gradient(135deg, #2980B9, #6DD5FA);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Close Modal Icon */
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease, transform 0.3s ease;
+            z-index: 17;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        .close-modal:hover {
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        /* Server Browser Content */
+        .session-list {
+            list-style: none;
+            max-height: 60vh;
+            overflow-y: auto;
+            margin: 40px auto;
+            padding: 0 40px;
+            width: 90%;
+        }
+
+        .session-list li {
+            padding: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(240,240,240,0.85));
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s, transform 0.3s;
+            position: relative;
+        }
+
+        .session-list li:hover {
+            background: linear-gradient(135deg, rgba(240,240,240,0.85), rgba(220,220,220,0.85));
+            transform: translateX(5px);
+        }
+
+        .session-name {
+            flex-grow: 1;
+            font-size: 1.1em;
+            color: #333;
+            margin-left: 15px;
+            font-weight: 600;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        .color-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            background-color: #6DD5FA; /* Default color */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        .join-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2980B9, #6DD5FA);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+            z-index: 18;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        .join-btn:hover {
+            background: linear-gradient(135deg, #1c5980, #2980B9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .create-session-btn {
+            width: 90%;
+            padding: 15px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+            margin: 30px auto 10px auto;
+            display: block;
+            font-weight: 600;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        .create-session-btn:hover {
+            background: linear-gradient(135deg, #1e8449, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Create Session Form */
+        #create-session-form {
+            display: none;
+            flex-direction: column;
+            margin: 30px auto;
+            width: 90%;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(240,240,240,0.95));
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #create-session-form input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.3s;
+            font-weight: 500;
+            -webkit-user-select: text; /* Safari */
+            -moz-user-select: text;    /* Firefox */
+            -ms-user-select: text;     /* Internet Explorer/Edge */
+            user-select: text;         /* Standard */
+        }
+
+        #create-session-form input:focus {
+            border-color: #2980B9;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+        }
+
+        #create-session-form input[type="color"] {
+            padding: 0;
+            height: 45px;
+            appearance: none;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 25px;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        #create-session-form button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #2980B9, #6DD5FA);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 15px;
+            font-weight: 600;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
+        }
+
+        #create-session-form button:hover {
+            background: linear-gradient(135deg, #1c5980, #2980B9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        #create-session-form .cancel-btn {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+        }
+
+        #create-session-form .cancel-btn:hover {
+            background: linear-gradient(135deg, #922b21, #c0392b);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Comparison Container */
         .container {
             display: flex;
             height: 100%;
             width: 100%;
             transition: flex 0.5s ease;
             position: relative;
+            z-index: 1;
         }
 
         .side {
@@ -78,18 +416,23 @@
             justify-content: center;
             cursor: pointer;
             position: relative;
-            transition: flex 0.5s ease;
+            transition: flex 0.5s ease, background 0.3s ease;
             overflow: hidden;
+            width: 50%;
+            padding: 30px;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
-        /* Gradient Colors */
-        #ezra {
+        /* Main Comparison Styles (Unchanged) */
+        .side.ezra {
             background: linear-gradient(135deg, #6DD5FA, #2980B9); /* Ezra's gradient */
             color: #fff;
             z-index: 1;
         }
 
-        #cody {
+        .side.cody {
             background: linear-gradient(135deg, #f093fb, #f5576c); /* Cody's gradient */
             color: #fff;
             z-index: 1;
@@ -102,7 +445,8 @@
             object-fit: cover;
             border: 5px solid rgba(255, 255, 255, 0.5);
             margin-bottom: 20px;
-            transition: transform 0.2s;
+            transition: transform 0.3s ease;
+            z-index: 1;
         }
 
         .side:hover .profile-pic {
@@ -113,12 +457,20 @@
             font-size: 2em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
         }
 
         .score {
             font-size: 3em;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
         }
 
         /* Animation styles */
@@ -128,10 +480,14 @@
             pointer-events: none;
             color: #fff;
             font-weight: bold;
-            font-size: 1.5em;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            font-size: 1.8em;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
             transform: translate(-50%, -50%);
-            z-index: 2;
+            z-index: 22;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */
         }
 
         @keyframes floatUp {
@@ -141,57 +497,226 @@
             }
             100% {
                 opacity: 0;
-                transform: translate(-50%, -50%) translateY(-50px);
+                transform: translate(-50%, -50%) translateY(-70px);
             }
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .profile-pic {
-                width: 100px;
-                height: 100px;
+        @media (max-width: 1024px) {
+            /* Menu Icon Adjustments */
+            #menu-icon {
+                width: 30px;
+                height: 25px;
             }
 
-            .name {
-                font-size: 1.5em;
+            #menu-icon div {
+                height: 3px;
             }
 
-            .score {
+            /* Back Button */
+            #back-to-main {
+                padding: 8px 16px;
+                font-size: 0.95em;
+            }
+
+            /* Close Modal Icon */
+            .close-modal {
+                font-size: 1.8em;
+            }
+
+            /* Server Browser Heading */
+            #server-browser-modal h2 {
                 font-size: 2em;
             }
 
+            /* Session List Adjustments */
+            .session-list li {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .session-name {
+                font-size: 1em;
+                margin-left: 10px;
+            }
+
+            .join-btn {
+                padding: 8px 16px;
+                font-size: 0.85em;
+            }
+
+            .create-session-btn {
+                padding: 12px;
+                font-size: 1em;
+            }
+
+            /* Create Session Form */
+            #create-session-form {
+                padding: 20px;
+            }
+
+            #create-session-form input {
+                padding: 10px 12px;
+            }
+
+            #create-session-form button {
+                padding: 10px 18px;
+                font-size: 0.95em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Server Browser Modal Padding */
+            #server-browser-modal {
+                padding: 20px 0;
+            }
+
+            /* Back Button */
+            #back-to-main {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            /* Close Modal Icon */
+            .close-modal {
+                right: 20px;
+                font-size: 1.5em;
+            }
+
+            /* Session Name */
+            .session-name {
+                font-size: 0.95em;
+            }
+
+            /* Join Button */
+            .join-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            /* Create Session Button */
+            .create-session-btn {
+                padding: 10px;
+                font-size: 0.95em;
+            }
+
+            /* Create Session Form */
+            #create-session-form button {
+                padding: 9px 16px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Countdown Timer */
             #countdown {
                 font-size: 1.5em;
             }
 
+            /* Popup Message */
             #popup {
                 font-size: 1.2em;
-                padding: 20px 30px;
+                padding: 25px 35px;
+            }
+
+            /* Back Button */
+            #back-to-main {
+                padding: 6px 10px;
+                font-size: 0.85em;
+            }
+
+            /* Close Modal Icon */
+            .close-modal {
+                font-size: 1.3em;
+                right: 15px;
+            }
+
+            /* Session Name */
+            .session-name {
+                font-size: 0.9em;
+            }
+
+            /* Join Button */
+            .join-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+
+            /* Create Session Button */
+            .create-session-btn {
+                padding: 10px;
+                font-size: 0.95em;
+            }
+
+            /* Create Session Form Inputs */
+            #create-session-form input {
+                padding: 8px 10px;
+            }
+
+            /* Create Session Form Buttons */
+            #create-session-form button {
+                padding: 9px 16px;
+                font-size: 0.9em;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Countdown Timer -->
+    <!-- Menu Icon -->
+    <div id="menu-icon">
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+    <!-- Server Browser Modal -->
+    <div id="server-browser-modal">
+        <button id="back-to-main">&#8592; Back to Main Comparison</button>
+        <span class="close-modal" id="close-server-browser">&times;</span>
+        <h2>Server Browser</h2>
+        <ul class="session-list" id="session-list">
+            <!-- Sessions will be populated here -->
+        </ul>
+        <button class="create-session-btn" id="open-create-session">Create New Comparison</button>
+        <div id="create-session-form">
+            <input type="text" id="session-name1" placeholder="First Name" required>
+            <input type="color" id="session-color1" value="#6DD5FA" title="Select color for First Name">
+            <input type="url" id="session-pic1" placeholder="First Profile Picture URL" required>
+            <input type="text" id="session-name2" placeholder="Second Name" required>
+            <input type="color" id="session-color2" value="#f093fb" title="Select color for Second Name">
+            <input type="url" id="session-pic2" placeholder="Second Profile Picture URL" required>
+            <button id="create-session-button">Create</button>
+            <button id="cancel-create-session" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Countdown Timer for Default Comparison -->
     <div id="countdown">15:00:00:00</div>
 
-    <!-- Overlay for Popup -->
+    <!-- Overlay for Popup and Modal -->
     <div id="overlay"></div>
 
     <!-- Popup Message -->
     <div id="popup"></div>
 
-    <div class="container" id="container">
-        <div class="side" id="ezra">
+    <!-- Default Comparison Container -->
+    <div class="container" id="default-container">
+        <div class="side ezra" id="default-ezra">
             <img src="https://avatars.worldcubeassociation.org/uploads/user/avatar/2022SAMU02/1643103082.jpeg" alt="Ezra" class="profile-pic">
             <div class="name">Ezra</div>
-            <div class="score" id="ezra-score">0</div>
+            <div class="score" id="default-ezra-score">0</div>
         </div>
-        <div class="side" id="cody">
-            <img src="data:image/webp;base64,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" alt="Cody" class="profile-pic">
+        <div class="side cody" id="default-cody">
+            <img src="data:image/webp;base64,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"
+                alt="Cody" class="profile-pic">
             <div class="name">Cody</div>
-            <div class="score" id="cody-score">0</div>
+            <div class="score" id="default-cody-score">0</div>
         </div>
+    </div>
+
+    <!-- Additional Sessions Comparison Container -->
+    <div class="container" id="session-container" style="display: none;">
+        <!-- Dynamic content will be loaded here -->
     </div>
 
     <script>
@@ -211,67 +736,69 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // References to score elements
-        const ezraScoreEl = document.getElementById('ezra-score');
-        const codyScoreEl = document.getElementById('cody-score');
-        const container = document.getElementById('container');
+        /* =======================
+           Default Comparison
+        ========================== */
 
-        // References to database paths
-        const ezraScoreRef = database.ref('scores/ezra');
-        const codyScoreRef = database.ref('scores/cody');
-        const timerRef = database.ref('timer');
+        // References to default score elements
+        const defaultEzraScoreEl = document.getElementById('default-ezra-score');
+        const defaultCodyScoreEl = document.getElementById('default-cody-score');
+
+        // References to database paths for default comparison
+        const defaultEzraScoreRef = database.ref('scores/ezra');
+        const defaultCodyScoreRef = database.ref('scores/cody');
+        const defaultTimerRef = database.ref('timer');
 
         // Countdown duration in seconds (15 days)
-        const COUNTDOWN_DURATION = 15 * 24 * 60 * 60; // 1,296,000 seconds
+        const DEFAULT_COUNTDOWN_DURATION = 15 * 24 * 60 * 60; // 1,296,000 seconds
 
         // References to countdown elements
         const countdownEl = document.getElementById('countdown');
         const popupEl = document.getElementById('popup');
-        const overlayEl = document.getElementById('overlay');
 
-        // Initialize scores in database if not present
-        ezraScoreRef.once('value').then(snapshot => {
+        // Initialize default scores in database if not present
+        defaultEzraScoreRef.once('value').then(snapshot => {
             if (!snapshot.exists()) {
-                ezraScoreRef.set(0);
+                defaultEzraScoreRef.set(0);
             }
         });
 
-        codyScoreRef.once('value').then(snapshot => {
+        defaultCodyScoreRef.once('value').then(snapshot => {
             if (!snapshot.exists()) {
-                codyScoreRef.set(0);
+                defaultCodyScoreRef.set(0);
             }
         });
 
         // Initialize timer in database if not present
-        timerRef.once('value').then(snapshot => {
+        defaultTimerRef.once('value').then(snapshot => {
             if (!snapshot.exists()) {
-                const endTime = Date.now() + COUNTDOWN_DURATION * 1000;
-                timerRef.set({
+                const endTime = Date.now() + DEFAULT_COUNTDOWN_DURATION * 1000;
+                defaultTimerRef.set({
                     endTime: endTime
                 });
             }
         });
 
-        // Listen for score changes
-        ezraScoreRef.on('value', (snapshot) => {
+        // Listen for default score changes
+        defaultEzraScoreRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
-                ezraScoreEl.textContent = snapshot.val();
-                updateContainerFlex();
+                defaultEzraScoreEl.textContent = snapshot.val();
+                updateDefaultContainerFlex();
             }
         });
 
-        codyScoreRef.on('value', (snapshot) => {
+        defaultCodyScoreRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
-                codyScoreEl.textContent = snapshot.val();
-                updateContainerFlex();
+                defaultCodyScoreEl.textContent = snapshot.val();
+                updateDefaultContainerFlex();
             }
         });
 
-        // Listen for timer changes
-        timerRef.on('value', (snapshot) => {
+        // Listen for default timer changes
+        defaultTimerRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 const endTime = snapshot.val().endTime;
-                startCountdown(endTime);
+                startDefaultCountdown(endTime);
             }
         });
 
@@ -290,43 +817,39 @@
             });
         }
 
-        // Function to increment score in Firebase
-        function incrementScore(name) {
+        // Function to increment default score in Firebase
+        function incrementDefaultScore(name) {
             const scoreRef = database.ref('scores/' + name);
             scoreRef.transaction((currentScore) => {
                 return (currentScore || 0) + 1;
             });
         }
 
-        // Event listeners for clicks on Ezra and Cody
-        document.getElementById('ezra').addEventListener('click', (e) => {
+        // Event listeners for clicks on default Ezra and Cody
+        document.getElementById('default-ezra').addEventListener('click', (e) => {
             const x = e.clientX;
             const y = e.clientY;
             createFloat(x, y);
-            incrementScore('ezra');
+            incrementDefaultScore('ezra');
         });
 
-        document.getElementById('cody').addEventListener('click', (e) => {
+        document.getElementById('default-cody').addEventListener('click', (e) => {
             const x = e.clientX;
             const y = e.clientY;
             createFloat(x, y);
-            incrementScore('cody');
+            incrementDefaultScore('cody');
         });
 
-        // Function to update the container's flex proportions based on scores
-        function updateContainerFlex() {
-            const ezraScore = parseInt(ezraScoreEl.textContent, 10);
-            const codyScore = parseInt(codyScoreEl.textContent, 10);
+        // Function to update the default container's flex proportions based on scores
+        function updateDefaultContainerFlex() {
+            const ezraScore = parseInt(defaultEzraScoreEl.textContent, 10);
+            const codyScore = parseInt(defaultCodyScoreEl.textContent, 10);
             const total = ezraScore + codyScore;
 
             // Avoid division by zero
             if (total === 0) {
-                container.style.flexDirection = 'row';
-                container.childNodes.forEach(side => {
-                    if (side.classList && side.classList.contains('side')) {
-                        side.style.flex = "1";
-                    }
-                });
+                document.getElementById('default-ezra').style.flex = "1";
+                document.getElementById('default-cody').style.flex = "1";
                 return;
             }
 
@@ -347,23 +870,23 @@
             }
 
             // Apply flex
-            document.getElementById('ezra').style.flex = ezraFlex;
-            document.getElementById('cody').style.flex = codyFlex;
+            document.getElementById('default-ezra').style.flex = ezraFlex;
+            document.getElementById('default-cody').style.flex = codyFlex;
         }
 
-        // Function to start and manage the countdown timer
-        let countdownInterval; // To store the interval ID
+        // Function to start and manage the default countdown timer
+        let defaultCountdownInterval; // To store the interval ID
 
-        function startCountdown(endTime) {
+        function startDefaultCountdown(endTime) {
             // Clear any existing intervals
-            if (countdownInterval) clearInterval(countdownInterval);
+            if (defaultCountdownInterval) clearInterval(defaultCountdownInterval);
 
             function updateTimer() {
                 const now = Date.now();
                 const remainingMillis = Math.max(0, endTime - now);
                 const remainingSeconds = Math.floor(remainingMillis / 1000);
 
-                // Calculate days, hours, minutes, and seconds
+                // Correct calculation of days, hours, minutes, and seconds
                 const days = Math.floor(remainingSeconds / (24 * 60 * 60));
                 const hours = Math.floor((remainingSeconds % (24 * 60 * 60)) / 3600);
                 const minutes = Math.floor((remainingSeconds % 3600) / 60);
@@ -372,18 +895,18 @@
                 countdownEl.textContent = `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
                 if (remainingSeconds <= 0) {
-                    clearInterval(countdownInterval);
-                    showWinnerPopup();
+                    clearInterval(defaultCountdownInterval);
+                    showDefaultWinnerPopup();
                 }
             }
 
             updateTimer(); // Initial call
 
             if (Date.now() < endTime) {
-                countdownInterval = setInterval(updateTimer, 1000);
+                defaultCountdownInterval = setInterval(updateTimer, 1000);
             } else {
                 // Timer already expired
-                showWinnerPopup();
+                showDefaultWinnerPopup();
             }
         }
 
@@ -392,10 +915,10 @@
             return number.toString().padStart(2, '0');
         }
 
-        // Function to display the winner popup
-        function showWinnerPopup() {
-            const ezraScore = parseInt(ezraScoreEl.textContent, 10);
-            const codyScore = parseInt(codyScoreEl.textContent, 10);
+        // Function to display the winner popup for default comparison
+        function showDefaultWinnerPopup() {
+            const ezraScore = parseInt(defaultEzraScoreEl.textContent, 10);
+            const codyScore = parseInt(defaultCodyScoreEl.textContent, 10);
 
             let winner;
             if (ezraScore > codyScore) {
@@ -413,28 +936,369 @@
             }
 
             // Show the overlay and popup
-            overlayEl.style.display = 'block';
+            overlay.style.display = 'block';
             popupEl.style.display = 'block';
-
-            // Clicking anywhere hides the popup
-            // Remove existing listeners to prevent multiple bindings
-            overlayEl.removeEventListener('click', hidePopup);
-            popupEl.removeEventListener('click', hidePopup);
-
-            overlayEl.addEventListener('click', hidePopup);
-            popupEl.addEventListener('click', hidePopup);
         }
 
         // Function to hide the popup
         function hidePopup() {
-            overlayEl.style.display = 'none';
+            overlay.style.display = 'none';
             popupEl.style.display = 'none';
         }
 
-        // Function to update the container's flex on initial load
+        // Event Listener to Hide Popup when clicked
+        popupEl.addEventListener('click', hidePopup);
+        overlay.addEventListener('click', hidePopup);
+
+        /* =======================
+           Server Browser Modal
+        ========================== */
+
+        // DOM Elements
+        const menuIconElement = document.getElementById('menu-icon');
+        const serverBrowserModal = document.getElementById('server-browser-modal');
+        const closeServerBrowser = document.getElementById('close-server-browser');
+        const backToMainBtn = document.getElementById('back-to-main');
+        const openCreateSessionBtn = document.getElementById('open-create-session');
+        const createSessionForm = document.getElementById('create-session-form');
+        const createSessionButton = document.getElementById('create-session-button');
+        const cancelCreateSessionBtn = document.getElementById('cancel-create-session');
+        const sessionList = document.getElementById('session-list');
+        const sessionContainer = document.getElementById('session-container');
+
+        let currentSessionId = null;
+
+        // Event Listeners for Menu Icon
+        menuIconElement.addEventListener('click', () => {
+            menuIconElement.classList.toggle('active');
+            serverBrowserModal.style.display = 'block';
+            overlay.style.display = 'block';
+            // Hide the menu icon when menu is open
+            menuIconElement.classList.add('hidden');
+        });
+
+        // Event Listener to Close Server Browser Modal
+        closeServerBrowser.addEventListener('click', () => {
+            serverBrowserModal.style.display = 'none';
+            overlay.style.display = 'none';
+            createSessionForm.style.display = 'none';
+            toggleCreateSessionButtons(true);
+            menuIconElement.classList.remove('active');
+            // Show the menu icon when menu is closed
+            menuIconElement.classList.remove('hidden');
+        });
+
+        // Event Listener for Back to Main Comparison
+        backToMainBtn.addEventListener('click', () => {
+            serverBrowserModal.style.display = 'none';
+            overlay.style.display = 'none';
+            createSessionForm.style.display = 'none';
+            toggleCreateSessionButtons(true);
+            menuIconElement.classList.remove('active');
+            // Show the menu icon when menu is closed
+            menuIconElement.classList.remove('hidden');
+        });
+
+        // Event Listener to Open Create Session Form
+        openCreateSessionBtn.addEventListener('click', () => {
+            createSessionForm.style.display = 'flex';
+            toggleCreateSessionButtons(false);
+        });
+
+        // Event Listener to Cancel Create Session
+        cancelCreateSessionBtn.addEventListener('click', () => {
+            createSessionForm.style.display = 'none';
+            toggleCreateSessionButtons(true);
+            clearCreateSessionForm();
+        });
+
+        // Event Listener to Create Session
+        createSessionButton.addEventListener('click', () => {
+            const name1 = document.getElementById('session-name1').value.trim();
+            const name2 = document.getElementById('session-name2').value.trim();
+            const pic1 = document.getElementById('session-pic1').value.trim();
+            const pic2 = document.getElementById('session-pic2').value.trim();
+            const color1 = document.getElementById('session-color1').value;
+            const color2 = document.getElementById('session-color2').value;
+
+            if (!name1 || !name2 || !pic1 || !pic2 || !color1 || !color2) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Create a new session
+            const newSessionRef = database.ref('sessions').push();
+            const sessionId = newSessionRef.key;
+
+            newSessionRef.set({
+                name1: name1,
+                name2: name2,
+                pic1: pic1,
+                pic2: pic2,
+                color1: color1,
+                color2: color2,
+                scores: {
+                    [name1.toLowerCase()]: 0,
+                    [name2.toLowerCase()]: 0
+                }
+                // Note: No timer for additional sessions
+            }, (error) => {
+                if (error) {
+                    alert('Failed to create session.');
+                } else {
+                    // Automatically join the new session
+                    joinSession(sessionId);
+                    // Close the server browser modal
+                    serverBrowserModal.style.display = 'none';
+                    overlay.style.display = 'none';
+                    createSessionForm.style.display = 'none';
+                    toggleCreateSessionButtons(true);
+                    clearCreateSessionForm();
+                    menuIconElement.classList.remove('active');
+                    // Show the menu icon when menu is closed
+                    menuIconElement.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Function to Toggle Create Session and Create Buttons
+        function toggleCreateSessionButtons(showCreateButton) {
+            if (showCreateButton) {
+                openCreateSessionBtn.style.display = 'block';
+                createSessionButton.style.display = 'none';
+                cancelCreateSessionBtn.style.display = 'none';
+            } else {
+                openCreateSessionBtn.style.display = 'none';
+                createSessionButton.style.display = 'block';
+                cancelCreateSessionBtn.style.display = 'block';
+            }
+        }
+
+        // Function to Clear Create Session Form
+        function clearCreateSessionForm() {
+            document.getElementById('session-name1').value = '';
+            document.getElementById('session-color1').value = '#6DD5FA';
+            document.getElementById('session-pic1').value = '';
+            document.getElementById('session-name2').value = '';
+            document.getElementById('session-color2').value = '#f093fb';
+            document.getElementById('session-pic2').value = '';
+        }
+
+        // Function to Load Sessions into Server Browser
+        function loadServerBrowserSessions() {
+            const sessionsRef = database.ref('sessions');
+            sessionsRef.on('value', (snapshot) => {
+                sessionList.innerHTML = '';
+                snapshot.forEach((childSnapshot) => {
+                    const session = childSnapshot.val();
+                    const sessionId = childSnapshot.key;
+
+                    const li = document.createElement('li');
+
+                    // Color Indicators
+                    const color1 = document.createElement('div');
+                    color1.classList.add('color-indicator');
+                    color1.style.backgroundColor = session.color1 || '#6DD5FA';
+
+                    const sessionName = document.createElement('span');
+                    sessionName.classList.add('session-name');
+                    sessionName.textContent = `${session.name1} vs ${session.name2}`;
+
+                    const joinBtn = document.createElement('button');
+                    joinBtn.textContent = 'Join';
+                    joinBtn.classList.add('join-btn');
+
+                    joinBtn.addEventListener('click', () => {
+                        joinSession(sessionId);
+                        serverBrowserModal.style.display = 'none';
+                        overlay.style.display = 'none';
+                        menuIconElement.classList.remove('active');
+                        // Show the menu icon when menu is closed
+                        menuIconElement.classList.remove('hidden');
+                    });
+
+                    li.appendChild(color1);
+                    li.appendChild(sessionName);
+                    li.appendChild(joinBtn);
+                    sessionList.appendChild(li);
+                });
+            });
+        }
+
+        // Function to Join a Session
+        function joinSession(sessionId) {
+            currentSessionId = sessionId;
+            loadSessionUI(sessionId);
+        }
+
+        // Function to Load Session UI
+        function loadSessionUI(sessionId) {
+            const sessionRef = database.ref(`sessions/${sessionId}`);
+
+            sessionRef.once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    alert('Session does not exist.');
+                    return;
+                }
+
+                const session = snapshot.val();
+
+                // Hide default comparison
+                document.getElementById('default-container').style.display = 'none';
+                // Show session container
+                sessionContainer.style.display = 'flex';
+                // Clear existing session container
+                sessionContainer.innerHTML = '';
+
+                // Create two sides based on session data
+                const side1 = document.createElement('div');
+                side1.classList.add('side', 'session-side');
+                side1.dataset.name = session.name1.toLowerCase();
+                side1.style.background = `linear-gradient(135deg, ${session.color1}80, ${shadeColor(session.color1, -20)}80)`;
+
+                const img1 = document.createElement('img');
+                img1.src = session.pic1;
+                img1.alt = session.name1;
+                img1.classList.add('profile-pic');
+
+                const name1 = document.createElement('div');
+                name1.classList.add('name');
+                name1.textContent = session.name1;
+
+                const score1 = document.createElement('div');
+                score1.classList.add('score');
+                score1.id = 'session-score1';
+                score1.textContent = session.scores[session.name1.toLowerCase()] || 0;
+
+                side1.appendChild(img1);
+                side1.appendChild(name1);
+                side1.appendChild(score1);
+
+                const side2 = document.createElement('div');
+                side2.classList.add('side', 'session-side');
+                side2.dataset.name = session.name2.toLowerCase();
+                side2.style.background = `linear-gradient(135deg, ${session.color2}80, ${shadeColor(session.color2, -20)}80)`;
+
+                const img2 = document.createElement('img');
+                img2.src = session.pic2;
+                img2.alt = session.name2;
+                img2.classList.add('profile-pic');
+
+                const name2 = document.createElement('div');
+                name2.classList.add('name');
+                name2.textContent = session.name2;
+
+                const score2 = document.createElement('div');
+                score2.classList.add('score');
+                score2.id = 'session-score2';
+                score2.textContent = session.scores[session.name2.toLowerCase()] || 0;
+
+                side2.appendChild(img2);
+                side2.appendChild(name2);
+                side2.appendChild(score2);
+
+                // Add Leave button
+                const leaveBtn = document.createElement('button');
+                leaveBtn.textContent = 'Leave';
+                leaveBtn.classList.add('leave-btn');
+
+                leaveBtn.addEventListener('click', () => {
+                    leaveSession();
+                });
+
+                sessionContainer.appendChild(leaveBtn);
+                sessionContainer.appendChild(side1);
+                sessionContainer.appendChild(side2);
+
+                // Set up event listeners for the new sides
+                setupSessionScoreIncrement(side1, session.name1.toLowerCase(), session.color1);
+                setupSessionScoreIncrement(side2, session.name2.toLowerCase(), session.color2);
+
+                // Listen for score changes
+                setupSessionScoreListeners(sessionId, session);
+            });
+        }
+
+        // Function to Set Up Score Increment for Sessions
+        function setupSessionScoreIncrement(sideElement, name, color) {
+            sideElement.addEventListener('click', (e) => {
+                const x = e.clientX;
+                const y = e.clientY;
+                createFloat(x, y);
+                incrementSessionScore(name, color);
+            });
+        }
+
+        // Function to Increment Session Score
+        function incrementSessionScore(name, color) {
+            if (!currentSessionId) return;
+            const scoreRef = database.ref(`sessions/${currentSessionId}/scores/${name}`);
+            scoreRef.transaction((currentScore) => {
+                return (currentScore || 0) + 1;
+            });
+        }
+
+        // Function to Update UI Based on Score Changes for Sessions
+        function setupSessionScoreListeners(sessionId, session) {
+            const sessionScoresRef = database.ref(`sessions/${sessionId}/scores`);
+
+            sessionScoresRef.on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const scores = snapshot.val();
+                    document.getElementById('session-score1').textContent = scores[session.name1.toLowerCase()] || 0;
+                    document.getElementById('session-score2').textContent = scores[session.name2.toLowerCase()] || 0;
+                }
+            });
+        }
+
+        // Function to Leave a Session and Return to Default
+        function leaveSession() {
+            currentSessionId = null;
+            sessionContainer.style.display = 'none';
+            // Clear session container content
+            sessionContainer.innerHTML = '';
+            // Show default comparison
+            document.getElementById('default-container').style.display = 'flex';
+        }
+
+        /* =======================
+           Server Browser Initialization
+        ========================== */
+
+        // Initialize Server Browser Sessions on Load
         window.onload = () => {
-            updateContainerFlex();
+            loadServerBrowserSessions();
         };
+
+        /* =======================
+           Utility Functions
+        ========================== */
+
+        /**
+         * Shades a color by a given percentage.
+         * @param {string} color - The hex color code.
+         * @param {number} percent - The percentage to shade. Negative for darken, positive for lighten.
+         * @returns {string} - The shaded hex color code.
+         */
+        function shadeColor(color, percent) {
+            let R = parseInt(color.substring(1,3),16);
+            let G = parseInt(color.substring(3,5),16);
+            let B = parseInt(color.substring(5,7),16);
+
+            R = parseInt(R * (100 + percent) / 100);
+            G = parseInt(G * (100 + percent) / 100);
+            B = parseInt(B * (100 + percent) / 100);
+
+            R = (R<255)?R:255;  
+            G = (G<255)?G:255;  
+            B = (B<255)?B:255;  
+
+            const RR = ((R.toString(16).length==1)?'0'+R.toString(16):R.toString(16));
+            const GG = ((G.toString(16).length==1)?'0'+G.toString(16):G.toString(16));
+            const BB = ((B.toString(16).length==1)?'0'+B.toString(16):B.toString(16));
+
+            return "#"+RR+GG+BB;
+        }
     </script>
 </body>
 </html>
